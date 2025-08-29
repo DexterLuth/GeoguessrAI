@@ -4,7 +4,7 @@
 *.pth
 *.jpg
 **/*.png
-!/*.png
+!readMeImages/*.png
 *.zip
 archived
 json converter

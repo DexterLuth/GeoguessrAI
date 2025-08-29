@@ -6,7 +6,12 @@ The plonker is a google maps location guesser AI. It is given the location of a 
 
 The plonker achieved an average score of 637km and a median score of 150km on a holdout dataset of around 10,000 images. For reference the median distance of a Geoguessr player in the Champion division, which is made up of the top 0.01% of players, is 151km away.
 
-![alt text](performanceGraph.png)
+![Graph of performace](readMeImages/performanceGraph.png)
+
+## Demo
+
+Watch the Demo Video
+[![video](readMeImages/thumbnail.png)](https://www.youtube.com/watch?v=0dxkO17dH_M)
 
 ## Design
 
@@ -22,13 +27,9 @@ A classification model with countries as classes is trained on the image dataset
 
 In order to predict certain regions I created a recursion algorithm to split the world up into varying sized regions based on their amount of street view coverage. Below is an example of the regions created for the United Kingdom and Ireland.
 
-![alt text](regionsImage.png)
+![Image of Region in UK and Ireland](readMeImages/regionsImage.png)
 
 Using these regions as classes I trained a second model also with a TinyVit backbone and a custom head. The prediction from this model is cross referenced with the prediction from the country model. If the region in not in the predicted country the next most likely region inside the predicted country is chosen.
-
-<!-- ## Demo
-
-INSERT VIDEO HERE -->
 
 ## Notes
 
