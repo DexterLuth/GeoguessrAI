@@ -3,7 +3,8 @@
 *.csv
 *.pth
 *.jpg
-*.png
+**/*.png
+!/*.png
 *.zip
 archived
 json converter
