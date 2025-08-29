@@ -1,0 +1,25 @@
+*.json
+*.geojson
+*.csv
+*.pth
+*.jpg
+*.png
+*.zip
+archived
+json converter
+models
+node_modules
+squareLabels
+
+extension/img
+
+imgDownloader/images
+imgDownloader/jsons
+imgDownloader/scripts/*.txt
+imgDownloader/stitched
+imgDownloader/stitchedAllImages
+imgDownloader/test
+imgDownloader/zipped
+
+
+
