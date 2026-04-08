@@ -11,6 +11,9 @@ from shapely.geometry import Polygon, Point
 import json
 import random
 import time
+import os
+from pathlib import Path
+import boto3
 
 app = Flask(__name__)
 # fmt: off
@@ -19,15 +22,66 @@ country_names = ["Albania", "Andorra", "Antarctica", "Argentina", "Australia", "
 # fmt: on
 COUNTRY_MODEL_PATH = "tinyvit_country.pth"
 SQUARE_MODEL_PATH = "tinyvit_squares.pth"
+COUNTRY_BOUNDARIES_PATH = "countryBoundaries.geojson"
+LABEL_MAPPING_PATH = "label_mapping.json"
 NUM_COUNTRY_CLASSES = len(country_names)
 NUM_SQUARE_CLASSES = 3855
 
+
+def _get_required_asset_paths():
+    bucket = os.getenv("AWS_S3_BUCKET")
+    prefix = os.getenv("AWS_S3_PREFIX", "").strip("/")
+
+    # If no bucket is configured, continue with local files.
+    if not bucket:
+        return {
+            "country_boundaries": COUNTRY_BOUNDARIES_PATH,
+            "label_mapping": LABEL_MAPPING_PATH,
+            "country_model": COUNTRY_MODEL_PATH,
+            "square_model": SQUARE_MODEL_PATH,
+        }
+
+    cache_dir = Path(os.getenv("MODEL_ASSET_DIR", "model_assets"))
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    file_map = {
+        "country_boundaries": COUNTRY_BOUNDARIES_PATH,
+        "label_mapping": LABEL_MAPPING_PATH,
+        "country_model": COUNTRY_MODEL_PATH,
+        "square_model": SQUARE_MODEL_PATH,
+    }
+
+    region_name = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
+    s3 = boto3.client("s3", region_name=region_name)
+
+    resolved_paths = {}
+    for asset_name, file_name in file_map.items():
+        local_path = cache_dir / file_name
+        s3_key = f"{prefix}/{file_name}" if prefix else file_name
+
+        if not local_path.exists():
+            start_time = time.time()
+            print(f"Downloading s3://{bucket}/{s3_key} -> {local_path}")
+            s3.download_file(bucket, s3_key, str(local_path))
+            print(f"Downloaded {file_name} in {time.time() - start_time:.2f} seconds")
+
+        resolved_paths[asset_name] = str(local_path)
+
+    return resolved_paths
+
+
+asset_paths = _get_required_asset_paths()
+COUNTRY_BOUNDARIES_PATH = asset_paths["country_boundaries"]
+LABEL_MAPPING_PATH = asset_paths["label_mapping"]
+COUNTRY_MODEL_PATH = asset_paths["country_model"]
+SQUARE_MODEL_PATH = asset_paths["square_model"]
+
 start_time = time.time()
-gdf = gpd.read_file("countryBoundaries.geojson")
+gdf = gpd.read_file(COUNTRY_BOUNDARIES_PATH)
 print("Elapsed time loading GeoJSON: {:.2f} seconds".format(time.time() - start_time))
 
 start_time = time.time()
-with open("label_mapping.json", "r") as f:
+with open(LABEL_MAPPING_PATH, "r") as f:
     sqaureLabels = json.load(f)
 print(
     "Elapsed time loading label mapping: {:.2f} seconds".format(

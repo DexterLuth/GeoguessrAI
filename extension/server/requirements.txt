@@ -1,0 +1,8 @@
+flask
+boto3
+torch
+torchvision
+timm
+Pillow
+geopandas
+shapely
