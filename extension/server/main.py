@@ -10,6 +10,7 @@ import geopandas as gpd
 from shapely.geometry import Polygon, Point
 import json
 import random
+import time
 
 app = Flask(__name__)
 # fmt: off
@@ -20,10 +21,19 @@ COUNTRY_MODEL_PATH = "tinyvit_country.pth"
 SQUARE_MODEL_PATH = "tinyvit_squares.pth"
 NUM_COUNTRY_CLASSES = len(country_names)
 NUM_SQUARE_CLASSES = 3855
-gdf = gpd.read_file("countryBoundaries.geojson")
 
+start_time = time.time()
+gdf = gpd.read_file("countryBoundaries.geojson")
+print("Elapsed time loading GeoJSON: {:.2f} seconds".format(time.time() - start_time))
+
+start_time = time.time()
 with open("label_mapping.json", "r") as f:
     sqaureLabels = json.load(f)
+print(
+    "Elapsed time loading label mapping: {:.2f} seconds".format(
+        time.time() - start_time
+    )
+)
 
 finalCoords = {"lng": 0.0, "lat": 0.0}
 
@@ -81,6 +91,7 @@ class SquareCustomTinyViT(nn.Module):
         return x
 
 
+start_time = time.time()
 try:
     print(f"Loading model...")
 
@@ -122,6 +133,7 @@ transform = transforms.Compose(
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ]
 )
+print("Elapsed time loading models: {:.2f} seconds".format(time.time() - start_time))
 
 
 def is_square_in_country(square_id, country_id):
