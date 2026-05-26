@@ -22,5 +22,7 @@ imgDownloader/stitchedAllImages
 imgDownloader/test
 imgDownloader/zipped
 
+*.venv
+*.pyc
 
 
